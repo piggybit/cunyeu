@@ -3,71 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Pink Beating Heart</title>
+    <title>3D Beating Heart</title>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; background: #111; }
         canvas { display: block; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script>
-        var scene = new THREE.Scene();
-        var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        var renderer = new THREE.WebGLRenderer();
+        // Scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
-        // Parametric heart shape points (2D curve)
-        var points = [];
-        for (var i = 0; i < 100; i++) {
-            var t = (i / 100) * Math.PI * 2;
-            var x = 16 * Math.pow(Math.sin(t), 3);
-            var y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-            points.push(new THREE.Vector2(x / 20, y / 20)); // Scale down for better view
-        }
+        // Lighting
+        const light = new THREE.PointLight(0xffffff, 1, 100);
+        light.position.set(10, 10, 10);
+        scene.add(light);
 
-        // Lathe to create 3D geometry
-        var geometry = new THREE.LatheGeometry(points, 32);
-        var material = new THREE.MeshPhongMaterial({ color: 0xffc0cb, side: THREE.DoubleSide, shininess: 100 });
-        var heart = new THREE.Mesh(geometry, material);
+        // Heart geometry (simplified using merged shapes)
+        const heartShape = new THREE.Shape();
+        heartShape.moveTo(0, 0);
+        heartShape.bezierCurveTo(0, -0.3, -0.5, -0.5, -0.5, 0);
+        heartShape.bezierCurveTo(-0.5, 0.5, 0, 1, 0.6, 0.9);
+        heartShape.bezierCurveTo(1.2, 1, 1.7, 0.5, 1.7, 0);
+        heartShape.bezierCurveTo(1.7, -0.5, 1.2, -0.3, 0.6, -0.6);
+        heartShape.bezierCurveTo(0.3, -0.8, 0, -0.8, 0, 0);
+
+        const extrudeSettings = { depth: 0.2, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 0.1, bevelThickness: 0.1 };
+        const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+        const material = new THREE.MeshPhongMaterial({ color: 0xff0000, shininess: 100 });
+        const heart = new THREE.Mesh(geometry, material);
         scene.add(heart);
 
-        // Lighting
-        var pointLight = new THREE.PointLight(0xffffff, 1, 100);
-        pointLight.position.set(10, 10, 10);
-        scene.add(pointLight);
-        var ambientLight = new THREE.AmbientLight(0x404040);
-        scene.add(ambientLight);
+        camera.position.z = 3;
 
-        camera.position.z = 5;
-
-        // Controls
-        var controls = new THREE.OrbitControls(camera, renderer.domElement);
-
-        // Clock for animation timing
-        var clock = new THREE.Clock();
-
+        // Animation loop with beating effect
+        let time = 0;
         function animate() {
             requestAnimationFrame(animate);
-            var time = clock.getElapsedTime();
-
-            // Beating animation (pulsing scale)
-            var scale = 1 + 0.1 * Math.sin(time * 5); // Adjust the multiplier for beat speed/intensity
-            heart.scale.set(scale, scale, scale);
-
-            // Slow rotation
-            heart.rotation.y += 0.005;
-
-            controls.update();
+            time += 0.05;
+            heart.scale.set(1 + Math.sin(time) * 0.1, 1 + Math.sin(time) * 0.1, 1 + Math.sin(time) * 0.1); // Pulsate
+            heart.rotation.y += 0.01; // Rotate for dynamism
             renderer.render(scene, camera);
         }
-
         animate();
 
         // Handle window resize
-        window.addEventListener('resize', function() {
+        window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
