@@ -3,130 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cube Collector - 3D Game</title>
+    <title>Pinky Heart 3D Game</title>
     <style>
         body { margin: 0; overflow: hidden; }
         canvas { display: block; }
-        #score { position: absolute; top: 10px; left: 10px; color: white; font-family: Arial; font-size: 20px; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
-    <div id="score">Score: 0</div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script>
-        // Scene setup
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB); // Sky blue
-        scene.fog = new THREE.Fog(0x87CEEB, 10, 50);
-
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 1, 5);
-
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        document.body.appendChild(renderer.domElement);
-
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        directionalLight.position.set(5, 10, 5);
-        scene.add(directionalLight);
-
-        // Ground plane
-        const groundGeometry = new THREE.PlaneGeometry(100, 100);
-        const groundMaterial = new THREE.MeshBasicMaterial({ color: 0x228B22, side: THREE.DoubleSide });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        scene.add(ground);
-
-        // Collectibles and obstacles
-        const collectibles = [];
-        const obstacles = [];
-        const cubeSize = 1;
-        const numCollectibles = 10;
-        const numObstacles = 5;
-
-        function createCube(color, position) {
-            const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-            const material = new THREE.MeshBasicMaterial({ color });
-            const cube = new THREE.Mesh(geometry, material);
-            cube.position.set(...position);
-            scene.add(cube);
-            return cube;
-        }
-
-        for (let i = 0; i < numCollectibles; i++) {
-            const pos = [Math.random() * 40 - 20, cubeSize / 2, Math.random() * 40 - 20];
-            collectibles.push(createCube(0x00ff00, pos)); // Green collectibles
-        }
-
-        for (let i = 0; i < numObstacles; i++) {
-            const pos = [Math.random() * 40 - 20, cubeSize / 2, Math.random() * 40 - 20];
-            obstacles.push(createCube(0xff0000, pos)); // Red obstacles
-        }
-
-        // Controls
-        const keys = {};
-        document.addEventListener('keydown', (e) => keys[e.key.toLowerCase()] = true);
-        document.addEventListener('keyup', (e) => keys[e.key.toLowerCase()] = false);
-
-        // Mouse look
-        let mouseX = 0, mouseY = 0;
-        document.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX / window.innerWidth) * 2 - 1;
-            mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-        });
-
-        // Score
-        let score = 0;
-        const scoreElement = document.getElementById('score');
-
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Movement
-            const speed = 0.1;
-            if (keys['w']) camera.position.z -= speed * Math.cos(camera.rotation.y);
-            if (keys['s']) camera.position.z += speed * Math.cos(camera.rotation.y);
-            if (keys['a']) camera.position.x -= speed * Math.sin(camera.rotation.y);
-            if (keys['d']) camera.position.x += speed * Math.sin(camera.rotation.y);
-            if (keys[' ']) camera.position.y += speed; // Space to jump/fly up
-            if (keys['shift']) camera.position.y -= speed; // Shift to descend
-
-            // Mouse rotation
-            camera.rotation.y -= mouseX * 0.005;
-            camera.rotation.x -= mouseY * 0.005;
-            camera.rotation.x = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, camera.rotation.x));
-
-            // Collision detection
-            collectibles.forEach((cube, index) => {
-                if (camera.position.distanceTo(cube.position) < cubeSize) {
-                    scene.remove(cube);
-                    collectibles.splice(index, 1);
-                    score++;
-                    scoreElement.textContent = `Score: ${score}`;
-                }
-            });
-
-            obstacles.forEach((cube) => {
-                if (camera.position.distanceTo(cube.position) < cubeSize) {
-                    camera.position.set(0, 1, 5); // Reset position on collision
-                }
-            });
-
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        // Resize handler
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+    <script src="heart.js"></script>
 </body>
 </html>
